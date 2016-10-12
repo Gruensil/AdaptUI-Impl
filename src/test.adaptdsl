@@ -1,0 +1,202 @@
+service ResourceService from "resource.service" as "resourceServiceID" {
+	function setLangFile as "setLangFileID";
+	function setImageFile as "setImageFileID";
+};
+
+flow "Profile Evaluation"{
+	rule "Lang en-us"{
+		LEVEL 4;
+		FACT Profile m;
+		IF(m.getUser().getLanguage() == 'enus' && m.getUser().getLangChecked() == false)  
+		THEN (
+			editFact(m.getUser().setLangChecked(true));
+			functionCall(resourceServiceID,setLangFileID,"enus");
+		);
+	} 
+	rule "Lang de-de"{
+		LEVEL 4;
+		FACT Profile m;
+		IF(m.getUser().getLanguage() == 'dede' && m.getUser().getLangChecked() == false)  
+		THEN (
+			editFact(m.getUser().setLangChecked(true));
+			functionCall(resourceServiceID,setLangFileID,"dede");
+		);
+	} 
+	
+	rule "Image Low Res" {
+		LEVEL 6;
+		FACT Profile m;
+		IF(m.getEnvironment().getBrightnessLevel() <= 40)  
+		THEN (
+			functionCall(resourceServiceID,setImageFileID,"low");
+		);
+	}
+	rule "Image High Res" {
+		LEVEL 6;
+		FACT Profile m;
+		IF(m.getEnvironment().getBrightnessLevel() > 40)  
+		THEN (
+			functionCall(resourceServiceID,setImageFileID,"high");
+		);
+	}
+	
+	rule "Admin Option Not Selected" {
+		LEVEL 10;
+		FACT Profile m;
+		IF(m.getUser().getIsAdmin() == false && m.getUser().getAdminChecked() == false)  
+		THEN (
+			editFact(m.getUser().setAdminChecked(true));
+			deleteNavLink(administration);
+		);
+	}
+	rule "Admin Option Selected" {
+		LEVEL 10;
+		FACT Profile m;
+		IF(m.getUser().getIsAdmin() == true && m.getUser().getAdminChecked() == false
+			&& m.getUser().getUserRole() == "staff")  
+		THEN (
+			editFact(m.getUser().setAdminChecked(true));
+			addNavLink(administration,"administration");
+		);
+	}
+	
+	rule "Navigation Staff"{
+		LEVEL 11;
+		FACT Profile m;
+		IF(m.getUser().getRoleChecked() == false && m.getUser().getUserRole() == "staff")  
+		THEN (
+			editFact(m.getUser().setRoleChecked(true));
+			clearNavigation();
+			addNavLink(searchBooks,"books");
+			addNavLink(students,"students");
+			addNavLink(bookReservations,"bookReservations");
+			addNavLink(lendingForm,"lendingForm");
+		);
+	}
+	rule "Navigation Student"{
+		LEVEL 11;
+		FACT Profile m;
+		IF(m.getUser().getRoleChecked() == false && m.getUser().getUserRole() == "student")  
+		THEN (
+			editFact(m.getUser().setRoleChecked(true));
+			clearNavigation();
+			addNavLink(lentBook,"lent");
+			addNavLink(searchBooks,"books");
+		);
+	}
+	rule "Navigation Unregistered"{
+		LEVEL 12;
+		FACT Profile m;
+		IF(m.getUser().getUserRole() != "staff" && m.getUser().getUserRole() != "student")  
+		THEN (
+			editFact(m.getUser().setRoleChecked(true));
+			clearNavigation();
+		);
+	}
+	
+	rule "Low Vision"{
+		LEVEL 9;
+		FACT Profile m;
+		IF(m.getUser().hasWeakVision() == "true")  
+		THEN (
+			adaptCssClass("textPrimary","font-size","24px");
+			adaptCssClass("textSecondary","font-size","20px");
+		);
+	}
+	rule "Normal Vision"{
+		LEVEL 9;
+		FACT Profile m;
+		IF(m.getUser().hasWeakVision() == "false")  
+		THEN (
+			adaptCssClass("textPrimary","font-size","18px");
+			adaptCssClass("textSecondary","font-size","14px");
+		);
+	}
+	
+	rule "Environment Brightness Under 40"{
+		LEVEL 6;
+		FACT Profile m;
+		IF(m.getEnvironment().getBrightnessLevel() <= 40)  
+		THEN (
+			adaptCssClass("backgroundPrimary","background-color","#232323");
+			adaptCssClass("backgroundSecondary","background-color","#323632");
+			adaptCssClass("textPrimary","color","white !important");
+			adaptCssClass("borderPrimary","border-color","#666666");
+			adaptCssClass("borderSecondary","border-color","black");
+			adaptCssClass("form-control","background-color","black");
+			adaptCssClass("form-control","border-color","#323232");
+			adaptCssClass("backgroundSecondary","background-color","#636363");
+			setDisplayProperty("tableClass","table table-striped table-striped-dark table-hover table-condensed textSecondary");
+		);
+	}
+	rule "Environment Brightness Over 40"{
+		LEVEL 6;
+		FACT Profile m;
+		IF(m.getEnvironment().getBrightnessLevel() > 40)  
+		THEN (
+			adaptCssClass("backgroundPrimary","background-color","white");
+			adaptCssClass("backgroundSecondary","background-color","lightgrey");
+			adaptCssClass("textPrimary","color","black");
+			adaptCssClass("borderPrimary","border-color","black");
+			adaptCssClass("borderSecondary","border-color","white");
+			adaptCssClass("form-control","background-color","#fff");
+			adaptCssClass("form-control","border-color","#ccc");
+			adaptCssClass("backgroundSecondary","background-color","lightgrey");
+			setDisplayProperty("tableClass","table table-striped table-hover table-condensed textSecondary");
+		);
+	}
+	
+	rule "Platform Desktop"{
+		LEVEL 6;
+		FACT Profile m;
+		IF(m.getPlatform().getPlatformType() == "desktop")  
+		THEN (
+			setDisplayProperty("headerBarClass","row backgroundSecondary divLine borderSecondary");
+			setDisplayProperty("routerOutletClass","col-md-10");
+			setDisplayProperty("hideOnMobile","");
+			setDisplayProperty("navbarContainerClass","sidebar-navbar col-md-2 backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarWrapperClass","sidebar-wrapper backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarHeaderClass","hideElement backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarCollapseClass","backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarItemListClass","sidebar-nav textPrimary backgroundSecondary borderSecondary");		
+			setDisplayProperty("searchInputGroupClass","input-group col-md-6 col-md-offset-4 backgroundSecondary borderSecondary");
+			setDisplayProperty("isMobile",false);
+		);
+	}
+	rule "Platform Mobile"{
+		LEVEL 6;
+		FACT Profile m;
+		IF(m.getPlatform().getPlatformType() == "mobile")  
+		THEN (
+			setDisplayProperty("headerBarClass","hideElement backgroundSecondary borderSecondary");
+			setDisplayProperty("routerOutletClass","col-md-12");
+			setDisplayProperty("hideOnMobile","hideElement backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarContainerClass","navbar navbar-default navbar-custom backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarWrapperClass","container-fluid backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarHeaderClass","navbar-header backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarCollapseClass","navbar-collapse collapse backgroundSecondary borderSecondary");
+			setDisplayProperty("navbarItemListClass","nav navbar-nav backgroundSecondary textPrimary");		
+			setDisplayProperty("searchInputGroupClass","input-group backgroundSecondary borderSecondary");
+			setDisplayProperty("isMobile",true);
+		);
+	} 
+	
+	rule "High Self Efficacy"{
+		LEVEL 8;
+		FACT Profile m;
+		IF(m.getUser().hasHighComputerSelfEfficiacy() == "true")
+		THEN(
+			setDisplayProperty("isAdvancedUser",true);
+		);
+	}	
+	rule "Low Self Efficacy"{
+		LEVEL 8;
+		FACT Profile m;
+		IF(m.getUser().hasHighComputerSelfEfficiacy() == "false")
+		THEN(
+			setDisplayProperty("isAdvancedUser",false);
+		);
+	}
+	
+	
+};
