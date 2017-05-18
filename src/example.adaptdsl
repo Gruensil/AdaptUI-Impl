@@ -1,7 +1,7 @@
 ContextModel{
 	Entity User{
 		Age { 
-			int,
+			number,
 			provider FaceDetection, 
 			update slow
 		};
@@ -89,56 +89,15 @@ AdaptationModel{
 				addNavLink(bookDetailsView,"showDetails");
 			);
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		rule "Platform Desktop"{
-			LEVEL 6;
-			FACT Profile m;
-			IF(m.getPlatform().getDeviceType() == "desktop")  
-			THEN (
-				setDisplayProperty("headerBarClass","row backgroundSecondary divLine borderSecondary");
-				setDisplayProperty("routerOutletClass","col-md-10");
-				setDisplayProperty("hideOnMobile","");
-				setDisplayProperty("navbarContainerClass","sidebar-navbar col-md-2 backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarWrapperClass","sidebar-wrapper backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarHeaderClass","hideElement backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarCollapseClass","backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarItemListClass","sidebar-nav textPrimary backgroundSecondary borderSecondary");		
-				setDisplayProperty("searchInputGroupClass","input-group col-md-6 col-md-offset-4 backgroundSecondary borderSecondary");
-				setDisplayProperty("isMobile",false);
-			);
-		}
-		rule "Platform Mobile"{
-			LEVEL 6;
-			FACT Profile m;
-			IF(m.getPlatform().getDeviceType() == "mobile")  
-			THEN (
-				setDisplayProperty("headerBarClass","hideElement backgroundSecondary borderSecondary");
-				setDisplayProperty("routerOutletClass","col-md-12");
-				setDisplayProperty("hideOnMobile","hideElement backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarContainerClass","navbar navbar-default navbar-custom backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarWrapperClass","container-fluid backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarHeaderClass","navbar-header backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarCollapseClass","navbar-collapse collapse backgroundSecondary borderSecondary");
-				setDisplayProperty("navbarItemListClass","nav navbar-nav backgroundSecondary textPrimary");		
-				setDisplayProperty("searchInputGroupClass","input-group backgroundSecondary borderSecondary");
-				setDisplayProperty("isMobile",true);
-			);
-		} 
 	};
 };
+
+
+
+
+
+
+
 		
 		
 //		rule "Lang en-us"{
