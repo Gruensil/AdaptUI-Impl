@@ -25,7 +25,7 @@ ContextModel{
 		Movement { 
 			level, 
 			provider DeviceAPI, 
-			update eventTriggered
+			update fast
 		};
 	};	
 	Entity Platform{
@@ -63,24 +63,58 @@ AdaptationModel{
 				functionCall(resourceServiceID,setLangFileID,"dede");
 			);
 		}
+		
 		rule "Environment Brightness Under 40"{
 			LEVEL 2;
 			FACT Profile m;
-			IF(m.getEnvironment().getAmbientLight() <= 40)  
+			IF(m.getEnvironment().getMovement() <= 1)  
 			THEN (
-				adaptCssClass("backgroundPrimary","background-color","#black");
-				adaptCssClass("backgroundSecondary","background-color","#black");
+				adaptCssClass("backgroundPrimary","background-color","#232323");
+				adaptCssClass("backgroundSecondary","background-color","#323632");
+				adaptCssClass("textPrimary","color","white !important");
+				adaptCssClass("borderPrimary","border-color","#666666");
+				adaptCssClass("borderSecondary","border-color","black");
+				adaptCssClass("form-control","background-color","black");
+				adaptCssClass("form-control","border-color","#323232");
+				adaptCssClass("backgroundSecondary","background-color","#636363");
+				setDisplayProperty("tableClass","table table-striped table-striped-dark table-hover table-condensed textSecondary");
 			);
 		}
 		rule "Environment Brightness Over 40"{
 			LEVEL 2;
 			FACT Profile m;
-			IF(m.getEnvironment().getAmbientLight() > 40)  
+			IF(m.getEnvironment().getMovement() > 1)
 			THEN (
 				adaptCssClass("backgroundPrimary","background-color","white");
 				adaptCssClass("backgroundSecondary","background-color","lightgrey");
+				adaptCssClass("textPrimary","color","black");
+				adaptCssClass("borderPrimary","border-color","black");
+				adaptCssClass("borderSecondary","border-color","white");
+				adaptCssClass("form-control","background-color","#fff");
+				adaptCssClass("form-control","border-color","#ccc");
+				adaptCssClass("backgroundSecondary","background-color","lightgrey");
+				setDisplayProperty("tableClass","table table-striped table-hover table-condensed textSecondary");
 			);
 		}
+		
+//		rule "Environment Brightness Under 40"{
+//			LEVEL 2;
+//			FACT Profile m;
+//			IF(m.getEnvironment().getAmbientLight() <= 40)  
+//			THEN (
+//				adaptCssClass("backgroundPrimary","background-color","#black");
+//				adaptCssClass("backgroundSecondary","background-color","#black");
+//			);
+//		}
+//		rule "Environment Brightness Over 40"{
+//			LEVEL 2;
+//			FACT Profile m;
+//			IF(m.getEnvironment().getAmbientLight() > 40)  
+//			THEN (
+//				adaptCssClass("backgroundPrimary","background-color","white");
+//				adaptCssClass("backgroundSecondary","background-color","lightgrey");
+//			);
+//		}
 		rule "Platform Desktop"{
 			LEVEL 3;
 			FACT Profile m;
