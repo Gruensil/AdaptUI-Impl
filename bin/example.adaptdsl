@@ -3,16 +3,26 @@ ContextModel{
 		Age { 
 			number,
 			provider FaceDetection, 
-			update slow
+			update fast
+		};
+		Gender { 
+			string, 
+			provider FaceDetection, 
+			update fast
 		};
 		Mood { 
 			mood,
 			provider FaceDetection, 
 			update fast
 		};
+		FaceDetected { 
+			boolean, 
+			provider FaceDetection, 
+			update fast
+		};
 		Language { 
 			language, 
-			provider UserData, 
+			provider DeviceAPI, 
 			update slow
 		};
 	};	
@@ -20,19 +30,24 @@ ContextModel{
 		AmbientLight {
 			level, 
 			provider DeviceAPI, 
-			update eventTriggered
+			update fast
 		};	
 		Movement { 
 			level, 
 			provider DeviceAPI, 
 			update fast
 		};
+		Location { 
+			string, 
+			provider Geocoding, 
+			update slow
+		};
 	};	
 	Entity Platform{
 		DeviceType { 
-			deviceType, 
+			string, 
 			provider DeviceAPI, 
-			update eventTriggered
+			update slow
 		};
 	};	
 	Providers{
@@ -67,7 +82,7 @@ AdaptationModel{
 		rule "Environment Brightness Under 40"{
 			LEVEL 2;
 			FACT Profile m;
-			IF(m.getEnvironment().getMovement() <= 1)  
+			IF(m.getEnvironment().getMovement() >= 1)  
 			THEN (
 				adaptCssClass("backgroundPrimary","background-color","#232323");
 				adaptCssClass("backgroundSecondary","background-color","#323632");
@@ -83,7 +98,7 @@ AdaptationModel{
 		rule "Environment Brightness Over 40"{
 			LEVEL 2;
 			FACT Profile m;
-			IF(m.getEnvironment().getMovement() > 1)
+			IF(m.getEnvironment().getMovement() < 1)
 			THEN (
 				adaptCssClass("backgroundPrimary","background-color","white");
 				adaptCssClass("backgroundSecondary","background-color","lightgrey");
