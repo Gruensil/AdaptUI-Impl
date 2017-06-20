@@ -42,6 +42,11 @@ ContextModel{
 			provider Geocoding, 
 			update slow
 		};
+		Weather { 
+			weather, 
+			provider Geocoding, 
+			update slow
+		};
 	};	
 	Entity Platform{
 		DeviceType { 
@@ -49,26 +54,47 @@ ContextModel{
 			provider DeviceAPI, 
 			update slow
 		};
-	};	
+	};
+	Entity App{
+		MoodChecked { 
+			boolean, 
+			provider AppState, 
+			update slow
+		};
+		OutsideChecked { 
+			boolean, 
+			provider AppState,
+			update eventTriggered
+		};
+		UserRole { 
+			string, 
+			provider AppState,
+			update fast
+		};
+	};
 	Providers{
 		UserData;
 		FaceDetection;
 		DeviceAPI;
 		Geocoding;
-		Weather;
+		AppState;
 	};
 	DefTypes{
 		mood: "happy","angry","indifferent","stressed";
 		level: "low", "med", "high";
 		language: "german", "english", "italian";
 		deviceType: "mobile", "desktop";
+		weather: "sunny", "rainy", "cloudy";
 	};
 	
 };
 AdaptationModel{
 	service ResourceService from "resource.service" as "resourceServiceID" {
 		function setLangFile as "setLangFileID";
-	};	
+	};
+	service LoggerService from "logger.service"	as "logger"{
+		function alert as "alert";
+	};
 	flow "Profile Evaluation"{
 		rule "Lang de-de"{
 			LEVEL 1;
@@ -79,65 +105,139 @@ AdaptationModel{
 			);
 		}
 		
-		rule "Environment Brightness Under 40"{
+		rule "User angry"{
 			LEVEL 2;
 			FACT Profile m;
-			IF(m.getEnvironment().getMovement() >= 1)  
+			IF(m.getUser().getMood() == 1 && m.getApp().getMoodChecked() == false)
 			THEN (
-				adaptCssClass("backgroundPrimary","background-color","#232323");
-				adaptCssClass("backgroundSecondary","background-color","#323632");
-				adaptCssClass("textPrimary","color","white !important");
-				adaptCssClass("borderPrimary","border-color","#666666");
-				adaptCssClass("borderSecondary","border-color","black");
-				adaptCssClass("form-control","background-color","black");
-				adaptCssClass("form-control","border-color","#323232");
-				adaptCssClass("backgroundSecondary","background-color","#636363");
-				setDisplayProperty("tableClass","table table-striped table-striped-dark table-hover table-condensed textSecondary");
+				editFact(m.getApp().setMoodChecked(true));
+				addNavLink(helpWindow,"Service Point");
 			);
 		}
-		rule "Environment Brightness Over 40"{
+		
+		rule "User not angry"{
+			LEVEL 2;
+			FACT Profile m;
+			IF(m.getUser().getMood() != 1 && m.getApp().getMoodChecked() == false)
+			THEN (
+				editFact(m.getApp().setMoodChecked(true));
+				deleteNavLink(helpWindow);
+			);
+		}
+		
+		rule "Recommend Learn Location"{
+			LEVEL 3;
+			FACT Profile m;
+			IF(m.getEnvironment().getLocation() == "Kernstadt, Paderborn, Deutschland" && m.getEnvironment().getWeather() != 1)
+			THEN (
+				addViewComponent(_MjqscFW_Eee_i6NdnvfQJg, helpWindow);
+			);
+		}
+		
+		rule "Don't Recommend Learn Location"{
+			LEVEL 3;
+			FACT Profile m;
+			IF(m.getEnvironment().getLocation() != "Kernstadt, Paderborn, Deutschland" || m.getEnvironment().getWeather()== 1)
+			THEN (
+				deleteViewComponent(_MjqscFW_Eee_i6NdnvfQJg);		
+			);
+		}
+		
+		rule "Movement High"{
+			LEVEL 2;
+			FACT Profile m;
+			IF(m.getEnvironment().getMovement() > 1)  
+			THEN (
+				adaptCssClass("textPrimary","font-size","28px");
+				adaptCssClass("textSecondary","font-size","24px");
+			);
+		}
+		rule "Movement Med"{
+			LEVEL 2;
+			FACT Profile m;
+			IF(m.getEnvironment().getMovement() == 1)  
+			THEN (
+				adaptCssClass("textPrimary","font-size","24px");
+				adaptCssClass("textSecondary","font-size","20px");
+			);
+		}
+		rule "Movement Low"{
 			LEVEL 2;
 			FACT Profile m;
 			IF(m.getEnvironment().getMovement() < 1)
 			THEN (
-				adaptCssClass("backgroundPrimary","background-color","white");
-				adaptCssClass("backgroundSecondary","background-color","lightgrey");
-				adaptCssClass("textPrimary","color","black");
-				adaptCssClass("borderPrimary","border-color","black");
-				adaptCssClass("borderSecondary","border-color","white");
-				adaptCssClass("form-control","background-color","#fff");
-				adaptCssClass("form-control","border-color","#ccc");
-				adaptCssClass("backgroundSecondary","background-color","lightgrey");
-				setDisplayProperty("tableClass","table table-striped table-hover table-condensed textSecondary");
+				adaptCssClass("textPrimary","font-size","18px");
+				adaptCssClass("textSecondary","font-size","14px");
 			);
 		}
 		
-//		rule "Environment Brightness Under 40"{
-//			LEVEL 2;
-//			FACT Profile m;
-//			IF(m.getEnvironment().getAmbientLight() <= 40)  
-//			THEN (
-//				adaptCssClass("backgroundPrimary","background-color","#black");
-//				adaptCssClass("backgroundSecondary","background-color","#black");
-//			);
-//		}
-//		rule "Environment Brightness Over 40"{
-//			LEVEL 2;
-//			FACT Profile m;
-//			IF(m.getEnvironment().getAmbientLight() > 40)  
-//			THEN (
-//				adaptCssClass("backgroundPrimary","background-color","white");
-//				adaptCssClass("backgroundSecondary","background-color","lightgrey");
-//			);
-//		}
 		rule "Platform Desktop"{
-			LEVEL 3;
+			LEVEL 6;
 			FACT Profile m;
 			IF(m.getPlatform().getDeviceType() == "desktop")  
 			THEN (
-				addNavLink(bookDetailsView,"showDetails");
+				setDisplayProperty("headerBarClass","row backgroundSecondary divLine borderSecondary");
+				setDisplayProperty("routerOutletClass","col-md-10");
+				setDisplayProperty("hideOnMobile","");
+				setDisplayProperty("navbarContainerClass","sidebar-navbar col-md-2 backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarWrapperClass","sidebar-wrapper backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarHeaderClass","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarCollapseClass","backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarItemListClass","sidebar-nav textPrimary backgroundSecondary borderSecondary");		
+				setDisplayProperty("searchInputGroupClass","input-group col-md-6 col-md-offset-4 backgroundSecondary borderSecondary");
+				setDisplayProperty("isMobile",false);
 			);
 		}
+		rule "Platform Mobile"{
+			LEVEL 6;
+			FACT Profile m;
+			IF(m.getPlatform().getDeviceType() == "mobile")  
+			THEN (
+				setDisplayProperty("headerBarClass","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("routerOutletClass","col-md-12");
+				setDisplayProperty("hideOnMobile","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarContainerClass","navbar navbar-default navbar-custom backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarWrapperClass","container-fluid backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarHeaderClass","navbar-header backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarCollapseClass","navbar-collapse collapse backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarItemListClass","nav navbar-nav backgroundSecondary textPrimary");		
+				setDisplayProperty("searchInputGroupClass","input-group backgroundSecondary borderSecondary");
+				setDisplayProperty("isMobile",true);
+			);
+		}
+		
+		rule "Navigation Staff"{
+			LEVEL 11;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() == "staff")  
+			THEN (
+				//clearNavigation();
+				addNavLink(searchBooks,"books");
+				addNavLink(students,"students");
+				addNavLink(bookReservations,"bookReservations");
+				addNavLink(lendingForm,"lendingForm");
+				addNavLink(administration,"administration");
+			);
+		}
+		rule "Navigation Student"{
+			LEVEL 11;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() == "student")  
+			THEN (
+				//clearNavigation();
+				addNavLink(lentBook,"lent");
+				addNavLink(searchBooks,"books");
+			);
+		}
+		rule "Navigation Unregistered"{
+			LEVEL 12;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() != "staff" && m.getApp().getUserRole() != "student")  
+			THEN (
+				clearNavigation();
+			);
+		}
+
 	};
 };
 
@@ -184,59 +284,7 @@ AdaptationModel{
 //			);
 //		}
 //		
-//		rule "Admin Option Not Selected" {
-//			LEVEL 10;
-//			FACT Profile M;
-//			IF(m.getUser().getIsAdmin() == false && m.getUser().getAdminChecked() == false)  
-//			THEN (
-//				editFact(m.getUser().setAdminChecked(true));
-//				deleteNavLink(administration);
-//			);
-//		}
-//		rule "Admin Option Selected" {
-//			LEVEL 10;
-//			FACT Profile M;
-//			IF(m.getUser().getIsAdmin() == true && m.getUser().getAdminChecked() == false
-//				&& m.getUser().getUserRole() == "staff")  
-//			THEN (
-//				editFact(m.getUser().setAdminChecked(true));
-//				addNavLink(administration,"administration");
-//			);
-//		}
 //		
-//		rule "Navigation Staff"{
-//			LEVEL 11;
-//			FACT Profile M;
-//			IF(m.getUser().getRoleChecked() == false && m.getUser().getUserRole() == "staff")  
-//			THEN (
-//				editFact(m.getUser().setRoleChecked(true));
-//				clearNavigation();
-//				addNavLink(searchBooks,"books");
-//				addNavLink(students,"students");
-//				addNavLink(bookReservations,"bookReservations");
-//				addNavLink(lendingForm,"lendingForm");
-//			);
-//		}
-//		rule "Navigation Student"{
-//			LEVEL 11;
-//			FACT Profile M;
-//			IF(m.getUser().getRoleChecked() == false && m.getUser().getUserRole() == "student")  
-//			THEN (
-//				editFact(m.getUser().setRoleChecked(true));
-//				clearNavigation();
-//				addNavLink(lentBook,"lent");
-//				addNavLink(searchBooks,"books");
-//			);
-//		}
-//		rule "Navigation Unregistered"{
-//			LEVEL 12;
-//			FACT Profile M;
-//			IF(m.getUser().getUserRole() != "staff" && m.getUser().getUserRole() != "student")  
-//			THEN (
-//				editFact(m.getUser().setRoleChecked(true));
-//				clearNavigation();
-//			);
-//		}
 //		
 //		rule "Low Vision"{
 //			LEVEL 9;
