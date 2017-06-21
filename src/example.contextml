@@ -1,73 +1,73 @@
 ContextModel{
 	Entity User{
 		Age { 
-			number,
-			provider FaceDetection, 
+			type number,
+			provider FaceDetection,
 			update fast
 		};
 		Gender { 
-			string, 
+			type string, 
 			provider FaceDetection, 
 			update fast
 		};
 		Mood { 
-			mood,
+			type mood,
 			provider FaceDetection, 
 			update fast
 		};
 		FaceDetected { 
-			boolean, 
+			type boolean, 
 			provider FaceDetection, 
 			update fast
 		};
 		Language { 
-			language, 
+			type language, 
 			provider DeviceAPI, 
 			update slow
 		};
 	};	
 	Entity Environment{
 		AmbientLight {
-			level, 
+			type level, 
 			provider DeviceAPI, 
 			update fast
 		};	
 		Movement { 
-			level, 
+			type level, 
 			provider DeviceAPI, 
 			update fast
 		};
 		Location { 
-			string, 
-			provider Geocoding, 
+			type string, 
+			provider Geocoding,
 			update slow
 		};
 		Weather { 
-			weather, 
+			type weather, 
 			provider Geocoding, 
 			update slow
 		};
 	};	
 	Entity Platform{
 		DeviceType { 
-			string, 
+			type string, 
 			provider DeviceAPI, 
 			update slow
 		};
 	};
 	Entity App{
 		MoodChecked { 
-			boolean, 
+			type boolean, 
 			provider AppState, 
 			update slow
 		};
 		OutsideChecked { 
-			boolean, 
+			type boolean, 
 			provider AppState,
 			update eventTriggered
 		};
 		UserRole { 
-			string, 
+			type string, 
 			provider AppState,
 			update fast
 		};
@@ -240,151 +240,3 @@ AdaptationModel{
 
 	};
 };
-
-
-
-
-
-
-
-		
-		
-//		rule "Lang en-us"{
-//			LEVEL 4;
-//			FACT Profile M;
-//			IF(m.getUser().getage() == 'en')
-//			THEN (
-//				functionCall(resourceServiceID,setLangFileID,"enus");
-//			);
-//		} 
-//		rule "Lang de-de"{
-//			LEVEL 4;
-//			FACT Profile m;
-//			IF(m.getUser().getLanguage() == 'dede')  
-//			THEN (
-//				editFact(m.getUser().setLangChecked(true));
-//				functionCall(resourceServiceID,setLangFileID,"dede");
-//			);
-//		} 
-//		
-//		rule "Image Low Res" {
-//			LEVEL 6;
-//			FACT Profile M;
-//			IF(m.getEnvironment().getLkjsdf() <= 40)  
-//			THEN (
-//				functionCall(resourceServiceID,setImageFileID,"low");
-//			);
-//		}
-//		rule "Image High Res" {
-//			LEVEL 6;
-//			FACT Profile M;
-//			IF(m.getEnvironment().getBrightnessLevel() > 40)  
-//			THEN (
-//				functionCall(resourceServiceID,setImageFileID,"high");
-//			);
-//		}
-//		
-//		
-//		
-//		rule "Low Vision"{
-//			LEVEL 9;
-//			FACT Profile M;
-//			IF(m.getUser().getVision() == "true")  
-//			THEN (
-//				adaptCssClass("textPrimary","font-size","24px");
-//				adaptCssClass("textSecondary","font-size","20px");
-//			);
-//		}
-//		rule "Normal Vision"{
-//			LEVEL 9;
-//			FACT Profile M;
-//			IF(m.getUser().getVision() == "false")  
-//			THEN (
-//				adaptCssClass("textPrimary","font-size","18px");
-//				adaptCssClass("textSecondary","font-size","14px");
-//			);
-//		}
-//		
-//		rule "Environment Brightness Under 40"{
-//			LEVEL 6;
-//			FACT Profile M;
-//			IF(m.getEnvironment().getBrightnessLevel() <= 40)  
-//			THEN (
-//				adaptCssClass("backgroundPrimary","background-color","#232323");
-//				adaptCssClass("backgroundSecondary","background-color","#323632");
-//				adaptCssClass("textPrimary","color","white !important");
-//				adaptCssClass("borderPrimary","border-color","#666666");
-//				adaptCssClass("borderSecondary","border-color","black");
-//				adaptCssClass("form-control","background-color","black");
-//				adaptCssClass("form-control","border-color","#323232");
-//				adaptCssClass("backgroundSecondary","background-color","#636363");
-//				setDisplayProperty("tableClass","table table-striped table-striped-dark table-hover table-condensed textSecondary");
-//			);
-//		}
-//		rule "Environment Brightness Over 40"{
-//			LEVEL 6;
-//			FACT Profile M;
-//			IF(m.getEnvironment().getBrightnessLevel() > 40)  
-//			THEN (
-//				adaptCssClass("backgroundPrimary","background-color","white");
-//				adaptCssClass("backgroundSecondary","background-color","lightgrey");
-//				adaptCssClass("textPrimary","color","black");
-//				adaptCssClass("borderPrimary","border-color","black");
-//				adaptCssClass("borderSecondary","border-color","white");
-//				adaptCssClass("form-control","background-color","#fff");
-//				adaptCssClass("form-control","border-color","#ccc");
-//				adaptCssClass("backgroundSecondary","background-color","lightgrey");
-//				setDisplayProperty("tableClass","table table-striped table-hover table-condensed textSecondary");
-//			);
-//		}
-//		
-//		rule "Platform Desktop"{
-//			LEVEL 6;
-//			FACT Profile M;
-//			IF(m.getPlatform().getPlatformType() == "desktop")  
-//			THEN (
-//				setDisplayProperty("headerBarClass","row backgroundSecondary divLine borderSecondary");
-//				setDisplayProperty("routerOutletClass","col-md-10");
-//				setDisplayProperty("hideOnMobile","");
-//				setDisplayProperty("navbarContainerClass","sidebar-navbar col-md-2 backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarWrapperClass","sidebar-wrapper backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarHeaderClass","hideElement backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarCollapseClass","backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarItemListClass","sidebar-nav textPrimary backgroundSecondary borderSecondary");		
-//				setDisplayProperty("searchInputGroupClass","input-group col-md-6 col-md-offset-4 backgroundSecondary borderSecondary");
-//				setDisplayProperty("isMobile",false);
-//			);
-//		}
-//		rule "Platform Mobile"{
-//			LEVEL 6;
-//			FACT Profile M;
-//			IF(m.getPlatform().getPlatformType() == "mobile")  
-//			THEN (
-//				setDisplayProperty("headerBarClass","hideElement backgroundSecondary borderSecondary");
-//				setDisplayProperty("routerOutletClass","col-md-12");
-//				setDisplayProperty("hideOnMobile","hideElement backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarContainerClass","navbar navbar-default navbar-custom backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarWrapperClass","container-fluid backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarHeaderClass","navbar-header backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarCollapseClass","navbar-collapse collapse backgroundSecondary borderSecondary");
-//				setDisplayProperty("navbarItemListClass","nav navbar-nav backgroundSecondary textPrimary");		
-//				setDisplayProperty("searchInputGroupClass","input-group backgroundSecondary borderSecondary");
-//				setDisplayProperty("isMobile",true);
-//			);
-//		} 
-//		
-//		rule "High Self Efficacy"{
-//			LEVEL 8;
-//			FACT Profile M;
-//			IF(m.getUser().getHighComputerSelfEfficiacy() == "true")
-//			THEN(
-//				setDisplayProperty("isAdvancedUser",true);
-//			);
-//		}	
-//		rule "Low Self Efficacy"{
-//			LEVEL 8;
-//			FACT Profile M;
-//			IF(m.getUser().getHighComputerSelfEfficiacy() == "false")
-//			THEN(
-//				setDisplayProperty("isAdvancedUser",false);
-//			);
