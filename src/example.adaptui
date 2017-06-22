@@ -146,16 +146,7 @@ AdaptationModel{
 		rule "Movement High"{
 			LEVEL 2;
 			FACT Profile m;
-			IF(m.getEnvironment().getMovement() > 1)  
-			THEN (
-				adaptCssClass("textPrimary","font-size","28px");
-				adaptCssClass("textSecondary","font-size","24px");
-			);
-		}
-		rule "Movement Med"{
-			LEVEL 2;
-			FACT Profile m;
-			IF(m.getEnvironment().getMovement() == 1)  
+			IF(m.getEnvironment().getMovement() >= 1)  
 			THEN (
 				adaptCssClass("textPrimary","font-size","24px");
 				adaptCssClass("textSecondary","font-size","20px");
