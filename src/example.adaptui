@@ -150,6 +150,8 @@ AdaptationModel{
 			THEN (
 				adaptCssClass("textPrimary","font-size","24px");
 				adaptCssClass("textSecondary","font-size","20px");
+				adaptCssClass("btn btn-default","width","300px");
+				adaptCssClass("btn btn-default","padding-top","40px");
 			);
 		}
 		rule "Movement Low"{
@@ -159,6 +161,8 @@ AdaptationModel{
 			THEN (
 				adaptCssClass("textPrimary","font-size","18px");
 				adaptCssClass("textSecondary","font-size","14px");
+				adaptCssClass("btn btn-default","width","200px");
+				adaptCssClass("btn btn-default","padding-top","20px");
 			);
 		}
 		
