@@ -130,7 +130,7 @@ AdaptationModel{
 			FACT Profile m;
 			IF(m.getEnvironment().getLocation() == "Kernstadt, Paderborn, Deutschland" && m.getEnvironment().getWeather() != 1)
 			THEN (
-				addViewComponent(_MjqscFW_Eee_i6NdnvfQJg, helpWindow);
+				addInteractionObject(learnPlaces);
 			);
 		}
 		
@@ -139,7 +139,7 @@ AdaptationModel{
 			FACT Profile m;
 			IF(m.getEnvironment().getLocation() != "Kernstadt, Paderborn, Deutschland" || m.getEnvironment().getWeather()== 1)
 			THEN (
-				deleteViewComponent(_MjqscFW_Eee_i6NdnvfQJg);		
+				deleteInteractionObject(learnPlaces);	
 			);
 		}
 		
@@ -148,10 +148,8 @@ AdaptationModel{
 			FACT Profile m;
 			IF(m.getEnvironment().getMovement() >= 1)  
 			THEN (
-				adaptCssClass("textPrimary","font-size","24px");
-				adaptCssClass("textSecondary","font-size","20px");
-				adaptCssClass("btn btn-default","width","300px");
-				adaptCssClass("btn btn-default","padding-top","40px");
+				changeList(studentList, small);
+				changeList(studentList, red);
 			);
 		}
 		rule "Movement Low"{
@@ -159,10 +157,9 @@ AdaptationModel{
 			FACT Profile m;
 			IF(m.getEnvironment().getMovement() < 1)
 			THEN (
-				adaptCssClass("textPrimary","font-size","18px");
-				adaptCssClass("textSecondary","font-size","14px");
-				adaptCssClass("btn btn-default","width","200px");
-				adaptCssClass("btn btn-default","padding-top","20px");
+				changeList(studentList,green);
+				changeList(studentList,big);
+				changeDetails(studentDetail, red);
 			);
 		}
 		

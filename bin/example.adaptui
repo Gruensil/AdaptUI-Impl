@@ -1,0 +1,234 @@
+ContextModel{
+	Entity User{
+		Age { 
+			type number,
+			provider FaceDetection,
+			update fast
+		};
+		Gender { 
+			type string, 
+			provider FaceDetection, 
+			update fast
+		};
+		Mood { 
+			type mood,
+			provider FaceDetection, 
+			update fast
+		};
+		FaceDetected { 
+			type boolean, 
+			provider FaceDetection, 
+			update fast
+		};
+		Language { 
+			type language, 
+			provider DeviceAPI, 
+			update slow
+		};
+	};	
+	Entity Environment{
+		AmbientLight {
+			type level, 
+			provider DeviceAPI, 
+			update fast
+		};	
+		Movement { 
+			type level, 
+			provider DeviceAPI, 
+			update fast
+		};
+		Location { 
+			type string, 
+			provider Geocoding,
+			update slow
+		};
+		Weather { 
+			type weather, 
+			provider Geocoding, 
+			update slow
+		};
+	};	
+	Entity Platform{
+		DeviceType { 
+			type string, 
+			provider DeviceAPI, 
+			update slow
+		};
+	};
+	Entity App{
+		MoodChecked { 
+			type boolean, 
+			provider AppState, 
+			update slow
+		};
+		OutsideChecked { 
+			type boolean, 
+			provider AppState,
+			update eventTriggered
+		};
+		UserRole { 
+			type string, 
+			provider AppState,
+			update fast
+		};
+	};
+	Providers{
+		UserData;
+		FaceDetection;
+		DeviceAPI;
+		Geocoding;
+		AppState;
+	};
+	DefTypes{
+		mood: "happy","angry","indifferent","stressed";
+		level: "low", "med", "high";
+		language: "german", "english", "italian";
+		deviceType: "mobile", "desktop";
+		weather: "sunny", "rainy", "cloudy";
+	};
+	
+};
+AdaptationModel{
+	service ResourceService from "resource.service" as "resourceServiceID" {
+		function setLangFile as "setLangFileID";
+	};
+	service LoggerService from "logger.service"	as "logger"{
+		function alert as "alert";
+	};
+	flow "Profile Evaluation"{
+		rule "Lang de-de"{
+			LEVEL 1;
+			FACT Profile m;
+			IF(m.getUser().getLanguage() == 'dede')
+			THEN (
+				functionCall(resourceServiceID,setLangFileID,"dede");
+			);
+		}
+		
+		rule "User angry"{
+			LEVEL 2;
+			FACT Profile m;
+			IF(m.getUser().getMood() == 1 && m.getApp().getMoodChecked() == false)
+			THEN (
+				editFact(m.getApp().setMoodChecked(true));
+				addNavLink(helpWindow,"Service Point");
+			);
+		}
+		
+		rule "User not angry"{
+			LEVEL 2;
+			FACT Profile m;
+			IF(m.getUser().getMood() != 1 && m.getApp().getMoodChecked() == false)
+			THEN (
+				editFact(m.getApp().setMoodChecked(true));
+				deleteNavLink(helpWindow);
+			);
+		}
+		
+		rule "Recommend Learn Location"{
+			LEVEL 3;
+			FACT Profile m;
+			IF(m.getEnvironment().getLocation() == "Kernstadt, Paderborn, Deutschland" && m.getEnvironment().getWeather() != 1)
+			THEN (
+				addInteractionObject(learnPlaces);
+			);
+		}
+		
+		rule "Don't Recommend Learn Location"{
+			LEVEL 3;
+			FACT Profile m;
+			IF(m.getEnvironment().getLocation() != "Kernstadt, Paderborn, Deutschland" || m.getEnvironment().getWeather()== 1)
+			THEN (
+				deleteInteractionObject(learnPlaces);	
+			);
+		}
+		
+		rule "Movement High"{
+			LEVEL 2;
+			FACT Profile m;
+			IF(m.getEnvironment().getMovement() >= 1)  
+			THEN (
+				changeList(studentList, small);
+				changeList(studentList, red);
+			);
+		}
+		rule "Movement Low"{
+			LEVEL 2;
+			FACT Profile m;
+			IF(m.getEnvironment().getMovement() < 1)
+			THEN (
+				changeList(studentList,green);
+				changeList(studentList,big);
+				changeDetails(studentDetail, red);
+			);
+		}
+		
+		rule "Platform Desktop"{
+			LEVEL 6;
+			FACT Profile m;
+			IF(m.getPlatform().getDeviceType() == "desktop")  
+			THEN (
+				setDisplayProperty("headerBarClass","row backgroundSecondary divLine borderSecondary");
+				setDisplayProperty("routerOutletClass","col-md-10");
+				setDisplayProperty("hideOnMobile","");
+				setDisplayProperty("navbarContainerClass","sidebar-navbar col-md-2 backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarWrapperClass","sidebar-wrapper backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarHeaderClass","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarCollapseClass","backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarItemListClass","sidebar-nav textPrimary backgroundSecondary borderSecondary");		
+				setDisplayProperty("searchInputGroupClass","input-group col-md-6 col-md-offset-4 backgroundSecondary borderSecondary");
+				setDisplayProperty("isMobile",false);
+			);
+		}
+		rule "Platform Mobile"{
+			LEVEL 6;
+			FACT Profile m;
+			IF(m.getPlatform().getDeviceType() == "mobile")  
+			THEN (
+				setDisplayProperty("headerBarClass","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("routerOutletClass","col-md-12");
+				setDisplayProperty("hideOnMobile","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarContainerClass","navbar navbar-default navbar-custom backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarWrapperClass","container-fluid backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarHeaderClass","navbar-header backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarCollapseClass","navbar-collapse collapse backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarItemListClass","nav navbar-nav backgroundSecondary textPrimary");		
+				setDisplayProperty("searchInputGroupClass","input-group backgroundSecondary borderSecondary");
+				setDisplayProperty("isMobile",true);
+			);
+		}
+		
+		rule "Navigation Staff"{
+			LEVEL 11;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() == "staff")  
+			THEN (
+				//clearNavigation();
+				addNavLink(searchBooks,"books");
+				addNavLink(students,"students");
+				addNavLink(bookReservations,"bookReservations");
+				addNavLink(lendingForm,"lendingForm");
+				addNavLink(administration,"administration");
+			);
+		}
+		rule "Navigation Student"{
+			LEVEL 11;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() == "student")  
+			THEN (
+				//clearNavigation();
+				addNavLink(lentBook,"lent");
+				addNavLink(searchBooks,"books");
+			);
+		}
+		rule "Navigation Unregistered"{
+			LEVEL 12;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() != "staff" && m.getApp().getUserRole() != "student")  
+			THEN (
+				clearNavigation();
+			);
+		}
+
+	};
+};

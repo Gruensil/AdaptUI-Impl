@@ -1,0 +1,177 @@
+ContextModel{
+	Entity User{
+		Age { 
+			type number,
+			provider FaceDetection,
+			update fast
+		};
+		Mood { 
+			type mood,
+			provider FaceDetection, 
+			update fast
+		};
+		FaceDetected { 
+			type boolean, 
+			provider FaceDetection, 
+			update fast
+		};
+		Language { 
+			type language, 
+			provider DeviceAPI, 
+			update slow
+		};
+	};	
+	Entity Platform{
+		DeviceType { 
+			type string, 
+			provider DeviceAPI, 
+			update fast
+		};
+	};
+	Entity Environment{
+		Movement { 
+			type level, 
+			provider DeviceAPI, 
+			update fast
+		};
+	};	
+	Entity App{
+		UserRole { 
+			type string, 
+			provider UserData,
+			update fast
+		};
+		MoodChecked { 
+			type boolean, 
+			provider AppState, 
+			update slow
+		};
+	};
+	Providers{
+		UserData;
+		DeviceAPI;
+		FaceDetection;
+		AppState;
+	};
+	DefTypes{
+		mood: "happy","angry","indifferent","stressed";
+		level: "low", "med", "high";
+		language: "german", "english", "italian";
+	};
+};
+AdaptationModel{
+	service ResourceService from "resource.service" as "resourceServiceID" {
+		function setLangFile as "setLangFileID";
+	};
+//	service LoggerService from "logger.service"	as "logger"{
+//		function alert as "alert";
+//	};
+	flow "Profile Evaluation"{
+		rule "Lang de-de"{
+			LEVEL 1;
+			FACT Profile m;
+			IF(m.getUser().getLanguage() == 0 )
+			THEN (
+				functionCall(resourceServiceID,setLangFileID,"dede");
+			);
+		}
+		rule "Lang en-us"{
+			LEVEL 1;
+			FACT Profile m;
+			IF(m.getUser().getLanguage() == 1)
+			THEN (
+				functionCall(resourceServiceID,setLangFileID,"enus");
+			);
+		}
+//		rule "Movement High"{
+//			LEVEL 2;
+//			FACT Profile m;
+//			IF(m.getEnvironment().getMovement() >= 1)  
+//			THEN (
+//				
+//			);
+//		}
+//		rule "Movement Low"{
+//			LEVEL 2;
+//			FACT Profile m;
+//			IF(m.getEnvironment().getMovement() < 1)
+//			THEN (
+//				
+//			);
+//		}
+
+		rule "User angry"{
+			LEVEL 5;
+			FACT Profile m;
+			IF(m.getUser().getMood() == 1 && m.getApp().getMoodChecked() == false)
+			THEN (
+				editFact(m.getApp().setMoodChecked(true));
+				changeButton(transfer, 26);
+			);
+		}
+		
+		rule "User not angry"{
+			LEVEL 5;
+			FACT Profile m;
+			IF(m.getUser().getMood() != 1 && m.getApp().getMoodChecked() == false)
+			THEN (
+				editFact(m.getApp().setMoodChecked(true));
+				changeButton(transfer, 18);
+			);
+		}
+		
+		rule "Platform Desktop"{
+			LEVEL 6;
+			FACT Profile m;
+			IF(m.getPlatform().getDeviceType() == "desktop")  
+			THEN (
+				setDisplayProperty("headerBarClass","row backgroundSecondary divLine borderSecondary");
+				setDisplayProperty("routerOutletClass","col-md-10");
+				setDisplayProperty("hideOnMobile","");
+				setDisplayProperty("navbarContainerClass","sidebar-navbar col-md-2 backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarWrapperClass","sidebar-wrapper backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarHeaderClass","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarCollapseClass","backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarItemListClass","sidebar-nav textPrimary backgroundSecondary borderSecondary");		
+				setDisplayProperty("searchInputGroupClass","input-group col-md-6 col-md-offset-4 backgroundSecondary borderSecondary");
+				setDisplayProperty("isMobile",false);
+			);
+		}
+		rule "Platform Mobile"{
+			LEVEL 6;
+			FACT Profile m;
+			IF(m.getPlatform().getDeviceType() == "atm")  
+			THEN (
+				setDisplayProperty("headerBarClass","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("routerOutletClass","col-md-12");
+				setDisplayProperty("hideOnMobile","hideElement backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarContainerClass","navbar navbar-default navbar-custom backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarWrapperClass","container-fluid backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarHeaderClass","navbar-header backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarCollapseClass","navbar-collapse collapse backgroundSecondary borderSecondary");
+				setDisplayProperty("navbarItemListClass","nav navbar-nav backgroundSecondary textPrimary");		
+				setDisplayProperty("searchInputGroupClass","input-group backgroundSecondary borderSecondary");
+				setDisplayProperty("isMobile",true);
+			);
+		}
+		
+		rule "Navigation Client"{
+			LEVEL 3;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() == "client")  
+			THEN (
+				addNavLink(mainMenu, "mainMenu");
+				addNavLink(transactionView, "transactionView");
+			);
+		}
+		rule "Navigation Unregistered"{
+			LEVEL 3;
+			FACT Profile m;
+			IF(m.getApp().getUserRole() != "client")  
+			THEN (
+				clearNavigation();
+			);
+		}
+
+	};
+};
